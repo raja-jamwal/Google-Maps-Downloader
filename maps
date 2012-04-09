@@ -1,0 +1,60 @@
+#!/bin/bash
+# Google Maps downloader for a given latitude & longitude, zoom level & dimensions
+# Usage :
+#	maps latitude longitude zoom_level dimensions (in tile unit)
+#	
+#	conversion b/w pixels and tile units:
+#		1 px = 1/256 tiles
+#		or 256 px = 1 tile
+#
+#	(C) Raja Jamwal <linux1@zoho.com>
+#
+
+lat=$1
+long=$2
+zoom=$3
+
+echo "Google Map Downloader (C) Raja Jamwal, <linux1@zoho.com>"
+
+dim=( `echo $4 | sed 's/x/\n/g'` )
+dim_x=${dim[0]}
+dim_y=${dim[1]}
+
+echo "Downloading $4 tile units Google satellite map for $lat $long at zoom $zoom"
+
+cord=( `./globalmaptiles.py $zoom $lat $long | grep 'Google: [0-9]* [0-9]*' | sed 's/Google: //g' | sed 's/\t//g' | sed 's/ /\n/g'` )
+
+# n total square matrix of tiles of zoom level
+size=256
+titlex=${cord[0]}
+titley=${cord[1]}
+
+startx=$(echo "$titlex-$dim_x" | bc)
+starty=$(echo "$titley-$dim_y" | bc)
+
+endx=$(echo "$titlex+$dim_x" | bc)
+endy=$(echo "$titley+$dim_y" | bc)
+
+#parameters start (x y) end (x y)
+# $x co-ordinates start - end
+for i in $(seq $startx $endx); 
+do  
+mkdir $i; 
+done;
+
+# crawl for map images in x(dir)/y(filename)
+curl "http://khm1.google.co.in/kh/v=107&src=app&x=[$startx-$endx]&y=[$starty-$endy]&z=$zoom&s=Gali" -o "#1/#2.jpg"
+
+echo "Stiching images job(1)"
+
+# stich images in dir in y line (vertically)
+for dir in $(ls); do convert $dir/*.jpg -append $dir.jpg;done;
+
+echo "Stiching images job(2)"
+
+#stich all y together
+convert *.jpg +append map.jpg
+#curl "http://khm1.google.co.in/kh/v=107&src=app&x=371[094-100]&y=2115[78-100]&z=19&s=Gali" -o "#1/#2.jpg"
+
+echo "Map is generated in 'map.jpg', you may remove other files"
+echo "Done.."

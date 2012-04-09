@@ -1,0 +1,29 @@
+# Google Maps downloader for a given latitude & longitude, zoom level & dimensions
+# Usage :
+#	maps latitude longitude zoom_level dimensions (in tile unit)
+#	
+#	conversion b/w pixels and tile units:
+#		1 px = 1/256 tiles
+#		or 256 px = 1 tile
+#
+#	(C) Raja Jamwal <linux1@zoho.com>
+
+Extract content to folder your want map to generate
+NOTE: large number of files/folder will be created in that folder
+
+To download a loc for eg latitude longitude 18E 77N
+lat long are +(E)/-(W)
+at zoom level of 17 { zoom:0-17 }
+
+maps 18 77 17 4x2
+
+4x2 is dimension relative to tile dimension (256x256 pixels)
+NOTE: Image is double the dimension of 4x2
+
+
+Dependacies:
+	curl	> 5.0
+	imagemagick >= 7.0
+	python 	>= 2.6
+	bc 	>= 1.0
+	bash	>= 3.0
